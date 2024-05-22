@@ -5,9 +5,14 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from transform import Compose,ToTensor,RandomHorizontalFlip,RandomVerticalFlip,Resize,Normalize
 from mydataset import Mydataset
 from model import Alexnet
+import torch.nn as nn
+from torch.utils.data import DataLoader
+from util import train,val,test
+import numpy as np
+# import optuna
 
 # TODO: 搭建模型(Alexnet,VGG,Resnet)
-def createModel(device):
+def createModel(device,pretrain=False):
 
     model = Alexnet(ch_in=3,cls_num=3)
     model = model.to(device=device)
@@ -33,7 +38,16 @@ def readDatalist(root,className):
 
     return images, labels
 
-
+# def objective(trail):
+#     params = {
+#         "batch_size":trail.suggest_int('batchsize', 2,4),
+#         "lr":trail.suggest_loguniform('lr', 1e-4, 1e-2),
+#         "weight_decay": trail.suggest_loguniform("weight_devay",1e-4,1e-3),
+#         "optimizer": trail.suggest_categorical("optimizer",["Adam","SGD"]),
+#     }
+#
+#     loss = main(params)
+#     return np.mean(loss)
 # TODO: 数据预处理(数据增强，去噪等)
 
 def main():
@@ -55,6 +69,7 @@ def main():
     val_files = [{"image": image, "label": label} for image, label in zip(val_images, val_labels)]
     test_files = [{"image": image, "label": label} for image, label in zip(testsImgPath, testsLabelPath)]
 
+
     train_transform = Compose([
         Resize((128,128),interpolation='bilinear'),
         ToTensor(),
@@ -67,7 +82,65 @@ def main():
     val_dataset = Mydataset(val_files,train_transform)
     test_dataset = Mydataset(test_files,train_transform)
 
-    model = createModel()
+    loss_function = nn.CrossEntropyLoss()
+    lr = arg.lr
+    batch_size = arg.batch_size
+    model = createModel(device,pretrain=False)
+    optimizer = torch.optim.SGD(params=model.parameters(),)
+    lr_schedular = torch.optim.lr_scheduler.StepLR(optimizer=optimizer,step_size=1000,gamma=0.33)
+
+    train_loader = DataLoader(train_dataset,batch_size=batch_size,shuffle=True,num_workers=2,pin_memory=True)
+    val_loader = DataLoader(val_dataset,batch_size=1,shuffle=False,num_workers=2,pin_memory=True)
+    test_loader = DataLoader(test_dataset,batch_size=1,shuffle=False,num_workers=2,pin_memory=True)
+
+    if arg.resume != " ":
+        check_point = torch.load(arg.resume,map_location='cpu')
+        model.load_state_dict(check_point["model"])
+        optimizer.load_state_dict(check_point["optimizer"])
+        lr_schedular.load_state_dict(check_point['lr_scheduler'])
+        arg.start_epoch = check_point["epoch"] + 1
+
+        print("load resume")
+
+
+    train_loss = []
+    val_loss = []
+    acc_values = []
+    best_value = -1
+    best_acc_result_epoch = 0
+
+    for epoch in range(arg.start_epoch,arg.max_epoch):
+        print(f"epoch{epoch} / {arg.max_epoch}")
+        loss = train(model,optimizer,train_loader,device,epoch,arg,
+                     loss_function,warmup=True)
+        train_loss.append(loss)
+        lr_schedular.step()
+
+        if (epoch + 1) % arg.val_interval == 0:
+            eval_loss,acc = eval(model,val_loader,arg,epoch,device,loss_function)
+            val_loss.append(eval_loss)
+            acc_values.append(acc)
+            save_file = {"model": model.state_dict(),
+                         "optimizer": optimizer.state_dict(),
+                         "lr_scheduler": lr_schedular.state_dict(),
+                         "opech": epoch}
+
+            if arg.save_best:
+                if acc > best_value:
+                    best_value = acc
+                    best_acc_result_epoch = epoch
+                    torch.save(save_file, os.path.join(arg.saveRoot, "best_model.pth"))
+                    print("saved new best metric model")
+                    print(f"best acc: {acc}")
+                print(
+                    f"\nbest mean acc_result: {np.mean(acc_values):.4f}"
+                    f"at epoch: {best_acc_result_epoch}"
+                )
+            torch.save(save_file, os.path.join(arg.saveRoot, "model.pth"))
+
+
+
+
 
 
 
