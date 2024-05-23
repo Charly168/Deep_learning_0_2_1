@@ -142,6 +142,7 @@ DVC 用于模型开发和数据版本控制，它与 Git 一起使用。掌握�
  dvc remote modify myremote gdrive_client_id <your-client-id>    
  dvc remote modify myremote gdrive_client_secret <your-client-secret>    
  ```
+Please go to [如何创建google cloud api](https://docs.zfile.vip/advanced/google-drive-api/) set the google drive API
 ## 认证与下载数据集
 1. 在执行`dvc pull`命令前，DVC会提示进行Google账户登录。按照提示完成身份验证。
 2. 执行DVC pull命令: `dvc pull`
