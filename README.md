@@ -28,7 +28,7 @@ Download dataset from ![link](https://www.kaggle.com/datasets/abtabm/multiclassi
 记得每次进行开发之后都要进行 *git commit -m*, 对于团队工作来说很重要，可以清楚的知道每次自己都干了什么。此外，你需要做的就是
 知道如何创建分支，然后自己的branch下面进行开发
 ## 数据库
-我用的是 [Google Drive](https://drive.google.com/drive/folders/1NE2MCMWE6OlvFni-B71KC4zwO8vEsr7d?usp=drive_link) 作为我们远程的库，用于储存所有的 `img` 文件、`model.pth`、和其他的一些大型数据。储存在谷歌云中的三分类文件夹的 ID 地址是：`1W12RrX_EbONHF2f2Uw1XOtWWNn05VhtF?usp`。以后我们数据就都存放在里面。
+我用的是 [Google Drive](https://drive.google.com/drive/folders/1NE2MCMWE6OlvFni-B71KC4zwO8vEsr7d?usp=drive_link) 作为我们远程的库，用于储存所有的 `img` 文件、`model.pth`、和其他的一些大型数据。储存在谷歌云中的三分类文件夹的 ID 地址是：`1TZ-RKDRaU4iwbZaDrIEOTe5TBvhnlCJH`。以后我们数据就都存放在里面。
 
 ## DVC (Data Version Control) 和 Git
 DVC 用于模型开发和数据版本控制，它与 Git 一起使用。掌握以下命令即可：
@@ -130,7 +130,26 @@ DVC 用于模型开发和数据版本控制，它与 Git 一起使用。掌握�
 
 通过这些步骤，你可以确保数据文件和版本控制在 DVC 和 Git 中都保持同步，并能够追踪和管理数据的不同版本。
 
+# 数据集下载说明
+## 先决条件1. 安装DVC: `pip install dvc`
+2. 克隆此GitHub仓库: `git clone git@github.com:Charly168/Deep_learning_0_2_1.git` or 'git clone https://github.com/Charly168/Deep_learning_0_2_1.git'
+
+## 配置DVC远程
+1. 进入仓库目录: `cd Deep_learning_0_2_1`
+2. 添加DVC远程:   
+ ```sh    
+ dvc remote add -d myremote gdrive://1TZ-RKDRaU4iwbZaDrIEOTe5TBvhnlCJH
+ dvc remote modify myremote gdrive_client_id <your-client-id>    
+ dvc remote modify myremote gdrive_client_secret <your-client-secret>    
+ ```
+## 认证与下载数据集
+1. 在执行`dvc pull`命令前，DVC会提示进行Google账户登录。按照提示完成身份验证。
+2. 执行DVC pull命令: `dvc pull`
+确保你已经配置好了Google Drive的共享权限，并在需要时提供具体的文件夹ID。用户也可以使用他们自己的OAuth 2.0凭证来配置DVC远程。
+
+
 ## 一些有用的链接
 1. [如何创建google cloud api](https://docs.zfile.vip/advanced/google-drive-api/)
 2. [DVC 入门详细介绍](https://blog.51cto.com/liferecords/5132658)
 3. [Git 入门详细介绍](https://zhuanlan.zhihu.com/p/369486197)
+4. [DVC+google drive Introduction](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive)
