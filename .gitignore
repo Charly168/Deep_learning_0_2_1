@@ -6,3 +6,4 @@
 *.JPEG
 /data
 script.py
+*.pyc

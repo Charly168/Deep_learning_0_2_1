@@ -7,7 +7,7 @@ from mydataset import Mydataset
 from model import Alexnet
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from util import train,val,test
+# from util import train,val,test
 import numpy as np
 # import optuna
 
@@ -71,7 +71,7 @@ def main():
 
 
     train_transform = Compose([
-        Resize((128,128),interpolation='bilinear'),
+        Resize((227,227),interpolation='bilinear'),
         ToTensor(),
         RandomVerticalFlip(),
         RandomHorizontalFlip(),
