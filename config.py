@@ -3,19 +3,19 @@
 
 class Config:
 
-    batch_size = None
+    batch_size = 4
 
-    lr = None
+    lr = 0.01
 
     epoches = None
 
-    factor = 0.8
+    factor = 0.2
 
-    resume = ""
+    resume = " "
 
     start_epoch = 0
 
-    max_epoch = 1000
+    max_epoch = 10000
 
     val_interval = 2
 
@@ -25,6 +25,9 @@ class Config:
 
     testRoot = "/home/charly/Videos/Github/Deep_learning_0_2_1/data/test"
 
-    saveRoot = "/home/charly/Videos/Github/Deep_learning_0_2_1/weights"
+    saveWeights = "/home/charly/Videos/Github/Deep_learning_0_2_1/weights"
+
+    saveLogs = "/home/charly/Videos/Github/Deep_learning_0_2_1/log"
+
 
     className = "/home/charly/Videos/Github/Deep_learning_0_2_1/class_name.txt"

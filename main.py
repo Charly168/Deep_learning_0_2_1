@@ -7,8 +7,10 @@ from mydataset import Mydataset
 from model import Alexnet
 import torch.nn as nn
 from torch.utils.data import DataLoader
-# from util import train,val,test
+from util import train,val,test
 import numpy as np
+import matplotlib.pyplot as plt
+from datetime import datetime
 # import optuna
 
 # TODO: 搭建模型(Alexnet,VGG,Resnet)
@@ -110,14 +112,14 @@ def main():
     best_acc_result_epoch = 0
 
     for epoch in range(arg.start_epoch,arg.max_epoch):
-        print(f"epoch{epoch} / {arg.max_epoch}")
-        loss = train(model,optimizer,train_loader,device,epoch,arg,
+        print(f"epoch {epoch} / {arg.max_epoch}")
+        loss,lr_now = train(model,optimizer,train_loader,device,epoch,arg,
                      loss_function,warmup=True)
         train_loss.append(loss)
         lr_schedular.step()
 
         if (epoch + 1) % arg.val_interval == 0:
-            eval_loss,acc = eval(model,val_loader,arg,epoch,device,loss_function)
+            eval_loss,acc = val(model,val_loader,arg,epoch,device,loss_function)
             val_loss.append(eval_loss)
             acc_values.append(acc)
             save_file = {"model": model.state_dict(),
@@ -129,26 +131,41 @@ def main():
                 if acc > best_value:
                     best_value = acc
                     best_acc_result_epoch = epoch
-                    torch.save(save_file, os.path.join(arg.saveRoot, "best_model.pth"))
+                    torch.save(save_file, os.path.join(arg.saveWeights, "best_model.pth"))
                     print("saved new best metric model")
-                    print(f"best acc: {acc}")
+                    print(f"best acc: {best_value}")
+                    print(f"at epoch: {best_acc_result_epoch},current_lr:{lr_now}")
                 print(
-                    f"\nbest mean acc_result: {np.mean(acc_values):.4f}"
-                    f"at epoch: {best_acc_result_epoch}"
+                    f"\ncurrent acc: {np.mean(acc):.4f}"
                 )
-            torch.save(save_file, os.path.join(arg.saveRoot, "model.pth"))
+            torch.save(save_file, os.path.join(arg.saveWeights, "model.pth"))
 
+    now = datetime.now()
+    formatted_time = now.strftime("%Y-%m-%d")
+    plt.figure(figsize=(10,8))
+    
+    xt = [i for i in range(len(train_loss))]
+    xv = [i*2 for i in range(len(val_loss))]
+    plt.subplot(1,2,1)
+    plt.plot(xt,train_loss)
+    plt.plot(xv,val_loss)
+    plt.title("loss function")
+    plt.xlabel("epoch")
+    plt.ylabel("loss")
 
+    xacc = [i for i in range(len(acc_values))]
+    plt.subplot(1,2,2)
+    plt.plot(xacc,acc_values)
+    plt.title("accuracy graph")
+    plt.xlabel("epoch")
+    plt.ylabel("acc")
 
+    plt.tight_layout()
 
+    save_path = os.path.join(arg.saveLogs, "log", formatted_time)
+    os.makedirs(save_path, exist_ok=True)
+    plt.savefig(os.path.join(arg.saveLogs,"log",formatted_time,"result.jpg"))
 
-
-
-# TODO: 加载数据
-
-# TODO： train,val,test
-
-# TODO: 结果分析(acc,precision,recall)
 
 
 if __name__ == "__main__":

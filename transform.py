@@ -1,5 +1,6 @@
 import random
 from torchvision.transforms import functional as F
+from torchvision.transforms.functional import InterpolationMode
 import torch
 
 class Compose(object):
@@ -17,6 +18,7 @@ class ToTensor(object):
     """将PIL图像转为Tensor"""
     def __call__(self, image, label):
         image = F.to_tensor(image)
+        # label = F.to_tensor(label)
         return image, label
 
 
@@ -47,7 +49,11 @@ class Resize(object):
         self.size = size
         self.interpolation = interpolation
     def __call__(self,image,label):
-        image = F.resize(image, self.size, self.interpolation)
+        if self.interpolation == 'bilinear':self.interpolation = InterpolationMode.BILINEAR
+        elif self.interpolation == 'bicubic':self.interpolation = InterpolationMode.BILINEAR
+        elif self.interpolation == 'nearst': self.interpolation = InterpolationMode.NEAREST
+        else: self.interpolation = InterpolationMode.BILINEAR
+        image = F.resize(image, self.size, interpolation=self.interpolation)
         return image,label
 
 class Normalize(object):
@@ -59,7 +65,7 @@ class Normalize(object):
         else:
             self.image_mean = image_mean
             self.image_std = image_std
-    def normalize(self, image,label):
+    def __call__(self, image,label):
         """标准化处理"""
         dtype, device = image.dtype, image.device
         mean = torch.as_tensor(self.image_mean, dtype=dtype, device=device)
