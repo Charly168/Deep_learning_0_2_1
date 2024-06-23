@@ -7,3 +7,4 @@
 /data
 script.py
 *.pyc
+/__pycache__
