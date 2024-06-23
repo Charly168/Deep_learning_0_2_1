@@ -3,6 +3,9 @@ import torch.nn as nn
 
 class Alexnet(nn.Module):
     def __init__(self, ch_in=None, cls_num=None):
+        """
+        输入图像大小:227x227
+        """
         super(Alexnet, self).__init__()
         self.cls = cls_num
         self.ch_in = ch_in
