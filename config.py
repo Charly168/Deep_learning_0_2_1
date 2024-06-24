@@ -15,7 +15,7 @@ class Config:
 
     start_epoch = 0
 
-    max_epoch = 10000
+    max_epoch = 2000
 
     val_interval = 2
 
