@@ -76,8 +76,6 @@ def main():
     model.to(device)
     print("load model")
 
-
-
     data = test_dataset[50]
 
     image = data[0].to(device)

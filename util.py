@@ -67,7 +67,7 @@ def val(model,val_loader,arg,epoch,device,loss_function):
     return mean_loss,acc
 
 
-def test(model,val_loader,arg,epoch,device,loss_function):
+def test(model,val_loader,device):
     model.eval()
     y_pred = torch.tensor([], dtype=torch.float32, device=device)
     y = torch.tensor([], dtype=torch.long, device=device)
@@ -84,13 +84,11 @@ def test(model,val_loader,arg,epoch,device,loss_function):
             y_pred = torch.cat([y_pred, model(images)], dim=0)
             y = torch.cat([y, labels], dim=0)
 
-        loss = loss_function(y_pred,y)
         acc_value = torch.eq(y_pred.argmax(dim=1), y)
         acc = acc_value.sum().item() / len(acc_value)
   
-    mean_loss = loss.item() / step
 
-    return mean_loss,acc
+    return acc
 
 def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
     """
